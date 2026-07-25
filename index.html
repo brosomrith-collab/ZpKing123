@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC/USDT Signal Chart</title>
+  <!-- Load TradingView Lightweight Charts Library -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #121318;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    /* Header Bar */
+    .header {
+      background-color: #1a1c23;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-bottom: 1px solid #2a2e39;
+    }
+    .symbol {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #26a69a;
+    }
+    .badge {
+      background-color: #2a2e39;
+      color: #848e9c;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    /* Chart Container */
+    #chart-container {
+      flex: 1;
+      width: 100%;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Info Bar -->
+  <div class="header">
+    <div class="symbol">BTC/USDT</div>
+    <div class="badge">1h</div>
+    <div class="price" id="current-price">$64,083.20</div>
+  </div>
+
+  <!-- Chart Holder -->
+  <div id="chart-container"></div>
+
+  <script>
+    const container = document.getElementById('chart-container');
+
+    // 1. Create Chart Instance
+    const chart = LightweightCharts.createChart(container, {
+      width: container.clientWidth,
+      height: container.clientHeight,
+      layout: {
+        backgroundColor: '#121318',
+        textColor: '#848e9c',
+      },
+      grid: {
+        vertLines: { color: '#1f222d' },
+        horzLines: { color: '#1f222d' },
+      },
+      crosshair: {
+        mode: LightweightCharts.CrosshairMode.Normal,
+      },
+      priceScale: {
+        borderColor: '#2a2e39',
+      },
+      timeScale: {
+        borderColor: '#2a2e39',
+        timeVisible: true,
+        secondsVisible: false,
+      },
+    });
+
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+      chart.applyOptions({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    });
+
+    // 2. Add Candlestick Series
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: '#26a69a',
+      downColor: '#ef5350',
+      borderVisible: false,
+      wickUpColor: '#26a69a',
+      wickDownColor: '#ef5350',
+    });
+
+    // Sample Price Data
+    const rawData = [
+      { time: '2026-07-17 12:00', open: 63500, high: 64200, low: 63100, close: 63800 },
+      { time: '2026-07-18 12:00', open: 63800, high: 65900, low: 63600, close: 65400 },
+      { time: '2026-07-19 12:00', open: 65400, high: 65800, low: 63200, close: 63600 },
+      { time: '2026-07-20 12:00', open: 63600, high: 64800, low: 63400, close: 64500 },
+      { time: '2026-07-21 12:00', open: 64500, high: 67800, low: 64200, close: 67200 },
+      { time: '2026-07-22 12:00', open: 67200, high: 67400, low: 65200, close: 65800 },
+      { time: '2026-07-23 12:00', open: 65800, high: 66500, low: 64100, close: 64800 },
+      { time: '2026-07-24 12:00', open: 64800, high: 65200, low: 63200, close: 63700 },
+      { time: '2026-07-25 12:00', open: 63700, high: 64500, low: 63600, close: 64083 },
+    ];
+
+    candleSeries.setData(rawData);
+
+    // 3. Add Trend Indicator (Fast MA - Yellow)
+    const fastMaSeries = chart.addLineSeries({
+      color: '#ffeb3b',
+      lineWidth: 2,
+    });
+    
+    // Sample MA Data
+    fastMaSeries.setData([
+      { time: '2026-07-17 12:00', value: 63400 },
+      { time: '2026-07-18 12:00', value: 64500 },
+      { time: '2026-07-19 12:00', value: 64800 },
+      { time: '2026-07-20 12:00', value: 64100 },
+      { time: '2026-07-21 12:00', value: 65900 },
+      { time: '2026-07-22 12:00', value: 66600 },
+      { time: '2026-07-23 12:00', value: 65400 },
+      { time: '2026-07-24 12:00', value: 64300 },
+      { time: '2026-07-25 12:00', value: 64100 },
+    ]);
+
+    // 4. Add Buy/Sell Signal Markers
+    candleSeries.setMarkers([
+      {
+        time: '2026-07-19 12:00',
+        position: 'aboveBar',
+        color: '#ef5350',
+        shape: 'arrowDown',
+        text: 'SELL',
+      },
+      {
+        time: '2026-07-20 12:00',
+        position: 'belowBar',
+        color: '#26a69a',
+        shape: 'arrowUp',
+        text: 'BUY',
+      },
+      {
+        time: '2026-07-22 12:00',
+        position: 'aboveBar',
+        color: '#ef5350',
+        shape: 'arrowDown',
+        text: 'SELL',
+      }
+    ]);
+
+    // Auto-fit content inside view
+    chart.timeScale().fitContent();
+  </script>
+</body>
+</html>
