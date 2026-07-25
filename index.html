@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Do You Love Me?</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      /* Soft pink and white gradient background */
+      background: linear-gradient(135deg, #fff0f5 0%, #ffd1dc 50%, #ffe4e1 100%);
+      overflow: hidden;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 40px 30px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(255, 182, 193, 0.4);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .heart-icon {
+      font-size: 50px;
+      margin-bottom: 10px;
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    h1 {
+      color: #d81b60;
+      font-size: 2rem;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      min-height: 60px;
+      position: relative;
+    }
+
+    button {
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #ff8da1, #ff6b8b);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 107, 139, 0.4);
+    }
+
+    .btn-yes:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 20px rgba(255, 107, 139, 0.6);
+    }
+
+    .btn-no {
+      background-color: #ffffff;
+      color: #ff6b8b;
+      border: 2px solid #ff8da1;
+      position: absolute;
+      /* Positioned relative to the viewport once moved */
+      transition: all 0.15s ease-out;
+    }
+
+    /* Message pop-up when YES is clicked */
+    .success-message {
+      display: none;
+      font-size: 1.5rem;
+      color: #d81b60;
+      font-weight: 600;
+      animation: fadeIn 0.5s ease forward;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.15); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="card">
+    <div class="heart-icon">💖</div>
+    <h1 id="question">Do you love me?</h1>
+    
+    <div class="buttons" id="btnGroup">
+      <button class="btn-yes" id="yesBtn">Yes!</button>
+      <button class="btn-no" id="noBtn">No</button>
+    </div>
+
+    <div class="success-message" id="successMsg">
+      Yay! I knew it! 💖🥰
+    </div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const question = document.getElementById('question');
+    const btnGroup = document.getElementById('btnGroup');
+    const successMsg = document.getElementById('successMsg');
+
+    function moveButton() {
+      // Get viewport limits
+      const padding = 20;
+      const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+      const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+
+      // Calculate random coordinates within window boundaries
+      const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+      const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+
+      // Change button positioning to fixed so it can run across screen
+      noBtn.style.position = 'fixed';
+      noBtn.style.left = `${randomX}px`;
+      noBtn.style.top = `${randomY}px`;
+    }
+
+    // Trigger evade on hover or touch start
+    noBtn.addEventListener('mouseover', moveButton);
+    noBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      moveButton();
+    });
+
+    // Action on clicking YES
+    yesBtn.addEventListener('click', () => {
+      question.style.display = 'none';
+      btnGroup.style.display = 'none';
+      successMsg.style.display = 'block';
+    });
+  </script>
+
+</body>
+</html>
