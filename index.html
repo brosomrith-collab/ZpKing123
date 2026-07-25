@@ -4,17 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Zoqira Trading Terminal</title>
-  
+
+  <!-- TradingView Lightweight Charts Library -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
   <style>
     :root {
-      --bg-dark: #090b0e;
-      --bg-card: rgba(18, 22, 31, 0.75);
-      --bg-card-hover: rgba(28, 34, 48, 0.85);
+      --bg-dark: #0a0d12;
+      --bg-card: rgba(18, 22, 31, 0.85);
+      --bg-card-hover: rgba(28, 34, 48, 0.9);
       --border-color: rgba(255, 255, 255, 0.08);
-      
       --text-main: #f0f3f8;
       --text-muted: #788294;
-      
       --green-accent: #00f076;
       --green-glow: rgba(0, 240, 118, 0.35);
       --red-accent: #ff2a55;
@@ -31,7 +32,7 @@
     }
 
     body {
-      background: radial-gradient(circle at 50% 0%, #1a1f2c 0%, #090b0e 70%);
+      background: radial-gradient(circle at 50% 0%, #151a26 0%, #0a0d12 70%);
       color: var(--text-main);
       overflow: hidden;
       height: 100vh;
@@ -41,16 +42,15 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      backdrop-filter: blur(20px);
     }
 
-    /* Gradient Header */
+    /* Top Navigation Bar */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 8px 20px;
-      background: linear-gradient(180deg, rgba(20, 25, 36, 0.8) 0%, rgba(12, 15, 22, 0.8) 100%);
+      background: linear-gradient(180deg, rgba(20, 25, 36, 0.9) 0%, rgba(12, 15, 22, 0.9) 100%);
       border-bottom: 1px solid var(--border-color);
       height: 54px;
     }
@@ -91,19 +91,18 @@
     }
 
     .symbol { font-weight: 700; }
-    .change.negative { color: var(--red-accent); text-shadow: 0 0 8px var(--red-glow); }
-    .change.positive { color: var(--green-accent); text-shadow: 0 0 8px var(--green-glow); }
+    .price { font-weight: 700; color: #fff; }
 
     .top-actions { display: flex; gap: 10px; }
 
-    /* Workspace Layout */
+    /* Workspace Grid */
     .workspace {
       display: grid;
-      grid-template-columns: 250px 1fr 300px;
+      grid-template-columns: 240px 1fr 300px;
       height: calc(100vh - 54px);
     }
 
-    /* Glassmorphism Sidebars */
+    /* Sidebars */
     .sidebar-left, .sidebar-right {
       background: var(--bg-card);
       border-right: 1px solid var(--border-color);
@@ -119,14 +118,14 @@
     .sidebar-header {
       padding: 14px 18px;
       border-bottom: 1px solid var(--border-color);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.5px;
       color: var(--text-muted);
       text-transform: uppercase;
     }
 
-    /* Watchlist List */
+    /* Watchlist Items */
     .watchlist { list-style: none; overflow-y: auto; }
 
     .watchlist-item {
@@ -146,27 +145,15 @@
     .pair-info { display: flex; flex-direction: column; }
     .pair-name { font-weight: 700; font-size: 13px; }
     .pair-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .pair-price { text-align: right; font-size: 12px; font-weight: 600; }
 
-    .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    .badge-danger { background: var(--red-glow); color: var(--red-accent); border: 1px solid rgba(255, 42, 85, 0.3); }
-    .badge-success { background: var(--green-glow); color: var(--green-accent); border: 1px solid rgba(0, 240, 118, 0.3); }
-
-    /* Main Chart Area */
+    /* Main Chart Canvas Area */
     .chart-container {
       display: flex;
       flex-direction: column;
       position: relative;
-      background: radial-gradient(circle at 50% 50%, rgba(20, 26, 38, 0.5) 0%, rgba(9, 11, 14, 0.9) 100%);
       height: 100%;
+      width: 100%;
+      background: #0a0d12;
       overflow: hidden;
     }
 
@@ -183,15 +170,26 @@
     .signal-status-pill {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(255, 42, 85, 0.15);
-      border: 1px solid rgba(255, 42, 85, 0.4);
+      gap: 8px;
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    .signal-status-pill.sell {
+      background: rgba(255, 42, 85, 0.15);
+      border: 1px solid rgba(255, 42, 85, 0.4);
       color: var(--red-accent);
       box-shadow: 0 0 10px var(--red-glow);
+    }
+
+    .signal-status-pill.buy {
+      background: rgba(0, 240, 118, 0.15);
+      border: 1px solid rgba(0, 240, 118, 0.4);
+      color: var(--green-accent);
+      box-shadow: 0 0 10px var(--green-glow);
     }
 
     .status-indicator.live {
@@ -203,25 +201,18 @@
       box-shadow: 0 0 8px var(--green-accent);
     }
 
-    .chart-canvas-wrapper {
+    #chart {
       flex: 1;
       width: 100%;
       height: 100%;
-      position: relative;
     }
 
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Bottom Panel Dock */
+    /* Bottom Dock Bar */
     .bottom-dock {
       display: flex;
       gap: 10px;
       padding: 0 18px;
-      background: rgba(12, 15, 22, 0.8);
+      background: rgba(12, 15, 22, 0.85);
       border-top: 1px solid var(--border-color);
       height: 46px;
       align-items: center;
@@ -248,15 +239,15 @@
     }
 
     /* AI Copilot Panel */
-    .ai-chat-body { flex: 1; padding: 18px; font-size: 13px; }
-    
+    .ai-chat-body { flex: 1; padding: 18px; font-size: 13px; overflow-y: auto; }
+
     .ai-card {
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
       border: 1px solid var(--border-color);
       padding: 14px;
       border-radius: 12px;
       line-height: 1.5;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      margin-bottom: 12px;
     }
 
     .ai-actions { display: flex; gap: 8px; padding: 10px 18px; flex-wrap: wrap; }
@@ -276,7 +267,6 @@
     .chip:hover {
       border-color: var(--accent-blue);
       color: var(--accent-blue);
-      box-shadow: 0 0 8px rgba(0, 136, 255, 0.3);
     }
 
     .ai-input-container {
@@ -325,8 +315,7 @@
       </div>
       <div class="asset-info">
         <span class="symbol">BTC/USDT</span>
-        <span class="price">$64,020.00</span>
-        <span class="change negative">-1.71%</span>
+        <span class="price" id="header-price">Connecting...</span>
       </div>
       <div class="top-actions">
         <button class="btn btn-secondary">Telegram Alerts</button>
@@ -335,57 +324,43 @@
     </header>
 
     <main class="workspace">
-      <!-- Left Watchlist -->
+      <!-- Watchlist -->
       <aside class="sidebar-left">
         <div class="sidebar-header">Watchlist</div>
         <ul class="watchlist">
           <li class="watchlist-item active">
             <div class="pair-info">
               <span class="pair-name">BTCUSDT</span>
-              <span class="pair-sub">Bitcoin</span>
-            </div>
-            <div class="pair-price">
-              <span>64,020.00</span>
-              <span class="badge badge-danger">-1.71%</span>
+              <span class="pair-sub">Bitcoin / Tether</span>
             </div>
           </li>
           <li class="watchlist-item">
             <div class="pair-info">
               <span class="pair-name">ETHUSDT</span>
-              <span class="pair-sub">Ethereum</span>
-            </div>
-            <div class="pair-price">
-              <span>1,858.00</span>
-              <span class="badge badge-danger">-0.66%</span>
+              <span class="pair-sub">Ethereum / Tether</span>
             </div>
           </li>
           <li class="watchlist-item">
             <div class="pair-info">
-              <span class="pair-name">XAUUSD</span>
-              <span class="pair-sub">Gold</span>
-            </div>
-            <div class="pair-price">
-              <span>4,068.66</span>
-              <span class="badge badge-success">+0.47%</span>
+              <span class="pair-name">SOLUSDT</span>
+              <span class="pair-sub">Solana / Tether</span>
             </div>
           </li>
         </ul>
       </aside>
 
-      <!-- Center Custom Canvas Engine -->
+      <!-- Interactive Chart View -->
       <section class="chart-container">
         <div class="chart-toolbar">
-          <div class="signal-status-pill">
-            <span>ZOQIRA DESK: SELL SIGNAL ACTIVE</span>
+          <div class="signal-status-pill sell" id="signal-pill">
+            <span id="signal-text">ZOQIRA DESK: INITIALIZING REALTIME STREAM...</span>
           </div>
           <div style="font-size:12px; color:var(--text-muted);">
-            <span class="status-indicator live"></span> Realtime Feed Active
+            <span class="status-indicator live"></span> Live Feed Active
           </div>
         </div>
         
-        <div class="chart-canvas-wrapper" id="canvas-wrapper">
-          <canvas id="chartCanvas"></canvas>
-        </div>
+        <div id="chart"></div>
 
         <div class="bottom-dock">
           <button class="dock-tab active">Analysis</button>
@@ -395,131 +370,185 @@
         </div>
       </section>
 
-      <!-- Right AI Panel -->
+      <!-- AI Copilot Log -->
       <aside class="sidebar-right">
         <div class="sidebar-header">Zoqira AI Copilot</div>
-        <div class="ai-chat-body">
+        <div class="ai-chat-body" id="ai-chat-body">
           <div class="ai-card">
-            <p style="color:#f0b90b; font-weight:700; margin-bottom:6px;">AI Signal Overview</p>
-            <p>High probability <strong>SELL Signal</strong> detected on 15m timeframe near $64,200 resistance target.</p>
+            <p style="color:#f0b90b; font-weight:700; margin-bottom:6px;">Live Feed Attached</p>
+            <p>Connecting to <strong>Binance WebSocket</strong>. Real-time candles, price scales, and signals will render automatically.</p>
           </div>
         </div>
         <div class="ai-actions">
-          <button class="chip">Analyze Chart</button>
+          <button class="chip">Analyze Trend</button>
           <button class="chip">Risk Check</button>
-          <button class="chip">Best Setup</button>
+          <button class="chip">Clear Log</button>
         </div>
         <div class="ai-input-container">
-          <input type="text" placeholder="Ask AI about BTCUSDT..." />
+          <input type="text" placeholder="Ask AI about current signal..." />
           <button class="btn">Send</button>
         </div>
       </aside>
     </main>
   </div>
 
-  <!-- Custom Standalone Canvas Chart Engine with Built-in Buy/Sell Overlay -->
+  <!-- Chart & WebSocket Logic -->
   <script>
-    const canvas = document.getElementById("chartCanvas");
-    const wrapper = document.getElementById("canvas-wrapper");
-    const ctx = canvas.getContext("2d");
+    const container = document.getElementById('chart');
+    const pill = document.getElementById('signal-pill');
+    const pillText = document.getElementById('signal-text');
+    const chatBody = document.getElementById('ai-chat-body');
 
-    const data = [
-      { open: 65200, high: 65500, low: 64900, close: 65150, signal: null },
-      { open: 65150, high: 65350, low: 64700, close: 64850, signal: "SELL" },
-      { open: 64850, high: 65000, low: 64300, close: 64450, signal: null },
-      { open: 64450, high: 64800, low: 64100, close: 64700, signal: "BUY" },
-      { open: 64700, high: 64900, low: 64200, close: 64300, signal: null },
-      { open: 64300, high: 64500, low: 63800, close: 64020, signal: "SELL" }
-    ];
+    let allMarkers = [];
 
-    function resizeCanvas() {
-      canvas.width = wrapper.clientWidth * window.devicePixelRatio;
-      canvas.height = wrapper.clientHeight * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      renderChart();
+    // Initialize TradingView Lightweight Chart Engine
+    const chart = LightweightCharts.createChart(container, {
+      layout: {
+        background: { color: '#0a0d12' },
+        textColor: '#788294',
+      },
+      grid: {
+        vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
+        horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
+      },
+      crosshair: {
+        mode: LightweightCharts.CrosshairMode.Normal,
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        visible: true,
+      },
+      timeScale: {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        timeVisible: true,
+        secondsVisible: false,
+      },
+    });
+
+    const candlestickSeries = chart.addCandlestickSeries({
+      upColor: '#00f076',
+      downColor: '#ff2a55',
+      borderVisible: false,
+      wickUpColor: '#00f076',
+      wickDownColor: '#ff2a55',
+    });
+
+    // Fetch Historical Data from Binance REST API
+    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=100')
+      .then(res => res.json())
+      .then(data => {
+        const formattedData = data.map(d => ({
+          time: d[0] / 1000,
+          open: parseFloat(d[1]),
+          high: parseFloat(d[2]),
+          low: parseFloat(d[3]),
+          close: parseFloat(d[4]),
+        }));
+
+        candlestickSeries.setData(formattedData);
+
+        // Add Initial Historical BUY / SELL Signals
+        const buyTime = formattedData[formattedData.length - 20].time;
+        const sellTime = formattedData[formattedData.length - 5].time;
+
+        allMarkers = [
+          {
+            time: buyTime,
+            position: 'belowBar',
+            color: '#00f076',
+            shape: 'arrowUp',
+            text: 'BUY',
+          },
+          {
+            time: sellTime,
+            position: 'aboveBar',
+            color: '#ff2a55',
+            shape: 'arrowDown',
+            text: 'SELL',
+          }
+        ];
+
+        candlestickSeries.setMarkers(allMarkers);
+        updateSignalUI("SELL", formattedData[formattedData.length - 1].close);
+
+        // Start Realtime WebSocket Stream
+        connectWebSocket();
+      });
+
+    // Binance WebSocket Stream Connection
+    function connectWebSocket() {
+      const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@kline_1m');
+
+      let lastSignalType = "SELL";
+
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        const kline = message.k;
+
+        const currentCandle = {
+          time: kline.t / 1000,
+          open: parseFloat(kline.o),
+          high: parseFloat(kline.h),
+          low: parseFloat(kline.l),
+          close: parseFloat(kline.c),
+        };
+
+        candlestickSeries.update(currentCandle);
+        document.getElementById('header-price').innerText = '$' + currentCandle.close.toFixed(2);
+
+        // Live Dynamic Signal Handler
+        const priceDiff = currentCandle.close - currentCandle.open;
+        if (priceDiff > 12 && lastSignalType !== "BUY") {
+          lastSignalType = "BUY";
+          triggerSignal("BUY", currentCandle);
+        } else if (priceDiff < -12 && lastSignalType !== "SELL") {
+          lastSignalType = "SELL";
+          triggerSignal("SELL", currentCandle);
+        }
+      };
     }
 
-    function renderChart() {
-      const w = wrapper.clientWidth;
-      const h = wrapper.clientHeight;
-      const padding = 50;
+    function triggerSignal(type, candle) {
+      const newMarker = {
+        time: candle.time,
+        position: type === "BUY" ? 'belowBar' : 'aboveBar',
+        color: type === "BUY" ? '#00f076' : '#ff2a55',
+        shape: type === "BUY" ? 'arrowUp' : 'arrowDown',
+        text: type,
+      };
 
-      ctx.clearRect(0, 0, w, h);
+      allMarkers.push(newMarker);
+      candlestickSeries.setMarkers(allMarkers);
+      updateSignalUI(type, candle.close);
+    }
 
-      // Draw Gradient Background Lines (Grid)
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-      ctx.lineWidth = 1;
-      for (let i = 1; i < 5; i++) {
-        let y = (h / 5) * i;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
+    function updateSignalUI(type, price) {
+      if (type === "BUY") {
+        pill.className = "signal-status-pill buy";
+        pillText.innerText = "ZOQIRA DESK: BUY SIGNAL ACTIVE";
+      } else {
+        pill.className = "signal-status-pill sell";
+        pillText.innerText = "ZOQIRA DESK: SELL SIGNAL ACTIVE";
       }
 
-      // Calculate Price Scales
-      const prices = data.flatMap(d => [d.high, d.low]);
-      const minPrice = Math.min(...prices) - 200;
-      const maxPrice = Math.max(...prices) + 200;
-
-      const candleWidth = (w - padding * 2) / data.length / 2;
-
-      data.forEach((d, index) => {
-        const x = padding + index * (candleWidth * 2) + candleWidth;
-        const getY = (p) => h - padding - ((p - minPrice) / (maxPrice - minPrice)) * (h - padding * 2);
-
-        const openY = getY(d.open);
-        const closeY = getY(d.close);
-        const highY = getY(d.high);
-        const lowY = getY(d.low);
-
-        const isBullish = d.close >= d.open;
-        const color = isBullish ? "#00f076" : "#ff2a55";
-        const shadowColor = isBullish ? "rgba(0, 240, 118, 0.35)" : "rgba(255, 42, 85, 0.35)";
-
-        // Draw Wick
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x, highY);
-        ctx.lineTo(x, lowY);
-        ctx.stroke();
-
-        // Draw Candle Body with Glow
-        ctx.fillStyle = color;
-        ctx.shadowColor = shadowColor;
-        ctx.shadowBlur = 10;
-        const bodyY = Math.min(openY, closeY);
-        const bodyHeight = Math.max(Math.abs(closeY - openY), 3);
-        ctx.fillRect(x - candleWidth / 2, bodyY, candleWidth, bodyHeight);
-        ctx.shadowBlur = 0; // Reset Shadow
-
-        // Draw Buy/Sell Signal Markers
-        if (d.signal) {
-          const isBuy = d.signal === "BUY";
-          const badgeY = isBuy ? lowY + 25 : highY - 25;
-          const badgeColor = isBuy ? "#00f076" : "#ff2a55";
-
-          // Badge Background
-          ctx.fillStyle = badgeColor;
-          ctx.shadowColor = isBuy ? "rgba(0, 240, 118, 0.5)" : "rgba(255, 42, 85, 0.5)";
-          ctx.shadowBlur = 12;
-          ctx.beginPath();
-          ctx.roundRect(x - 22, badgeY - 10, 44, 20, 6);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-
-          // Badge Text
-          ctx.fillStyle = isBuy ? "#000" : "#fff";
-          ctx.font = "bold 11px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText(d.signal, x, badgeY + 4);
-        }
-      });
+      const log = document.createElement('div');
+      log.className = 'ai-card';
+      log.innerHTML = `
+        <p style="color:${type === 'BUY' ? '#00f076' : '#ff2a55'}; font-weight:700; margin-bottom:4px;">
+          ${type} SIGNAL TRIGGERED
+        </p>
+        <p>BTCUSDT executed <strong>${type}</strong> signal at level <strong>$${price.toFixed(2)}</strong>.</p>
+      `;
+      chatBody.prepend(log);
     }
 
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
+    // Auto-Resize Canvas for Smooth Responsiveness
+    window.addEventListener('resize', () => {
+      chart.applyOptions({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    });
   </script>
 </body>
 </html>
