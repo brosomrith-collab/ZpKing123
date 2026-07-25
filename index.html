@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Zoqira Trading Terminal</title>
   
-  <!-- TradingView Lightweight Charts Library -->
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <!-- Pinned Lightweight Charts v4.2.0 CDN to prevent breaking changes -->
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 
   <style>
     :root {
@@ -40,7 +40,7 @@
       height: 100vh;
     }
 
-    /* Top Bar */
+    /* Header */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -83,7 +83,7 @@
 
     .top-actions { display: flex; gap: 8px; }
 
-    /* Main Workspace */
+    /* Workspace Grid */
     .workspace {
       display: grid;
       grid-template-columns: 240px 1fr 280px;
@@ -139,7 +139,7 @@
     .badge-danger { background: rgba(255, 23, 68, 0.15); color: var(--red-accent); }
     .badge-success { background: rgba(0, 230, 118, 0.15); color: var(--green-accent); }
 
-    /* Chart Container Fixes */
+    /* Chart Area */
     .chart-container {
       display: flex;
       flex-direction: column;
@@ -188,7 +188,7 @@
     #tv-chart {
       flex: 1;
       width: 100%;
-      position: relative;
+      min-height: 200px;
     }
 
     /* Bottom Dock */
@@ -372,13 +372,18 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const chartContainer = document.getElementById("tv-chart");
+    window.onload = function() {
+      const container = document.getElementById("tv-chart");
+      
+      if (!window.LightweightCharts) {
+        console.error("LightweightCharts library failed to load");
+        return;
+      }
 
-      // Set explicit dimensions for initial render
-      const chart = LightweightCharts.createChart(chartContainer, {
-        width: chartContainer.clientWidth,
-        height: chartContainer.clientHeight,
+      // Render chart using verified Lightweight Charts v4 syntax
+      const chart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight,
         layout: {
           background: { color: "#0f1115" },
           textColor: "#848e9c",
@@ -401,43 +406,45 @@
         wickDownColor: "#ff1744",
       });
 
-      // Valid UNIX timestamp sequence for Lightweight Charts
-      const sampleData = [
-        { time: 1721890800, open: 65200, high: 65400, low: 65000, close: 65150 },
-        { time: 1721891700, open: 65150, high: 65300, low: 64800, close: 64900 },
-        { time: 1721892600, open: 64900, high: 65000, low: 64400, close: 64500 },
-        { time: 1721893500, open: 64500, high: 64700, low: 64100, close: 64150 },
-        { time: 1721894400, open: 64150, high: 64300, low: 63900, close: 64020 },
+      // Sample Price Data (Using YYYY-MM-DD Date format)
+      const data = [
+        { time: '2026-07-20', open: 66200, high: 66800, low: 65900, close: 66400 },
+        { time: '2026-07-21', open: 66400, high: 66600, low: 65200, close: 65400 },
+        { time: '2026-07-22', open: 65400, high: 65800, low: 64800, close: 65100 },
+        { time: '2026-07-23', open: 65100, high: 65300, low: 64200, close: 64600 },
+        { time: '2026-07-24', open: 64600, high: 64900, low: 63800, close: 64020 },
       ];
 
-      candlestickSeries.setData(sampleData);
+      candlestickSeries.setData(data);
 
-      // Add Buy and Sell Signals
+      // Buy & Sell Markers
       candlestickSeries.setMarkers([
         {
-          time: 1721891700,
-          position: "aboveBar",
-          color: "#ff1744",
-          shape: "arrowDown",
-          text: "SELL",
+          time: '2026-07-21',
+          position: 'aboveBar',
+          color: '#ff1744',
+          shape: 'arrowDown',
+          text: 'SELL',
         },
         {
-          time: 1721894400,
-          position: "belowBar",
-          color: "#00e676",
-          shape: "arrowUp",
-          text: "BUY",
+          time: '2026-07-24',
+          position: 'belowBar',
+          color: '#00e676',
+          shape: 'arrowUp',
+          text: 'BUY',
         },
       ]);
 
-      // Adjust chart size on browser resize
+      chart.timeScale().fitContent();
+
+      // Responsive Resize
       window.addEventListener("resize", () => {
         chart.applyOptions({
-          width: chartContainer.clientWidth,
-          height: chartContainer.clientHeight,
+          width: container.clientWidth,
+          height: container.clientHeight,
         });
       });
-    });
+    };
   </script>
 </body>
 </html>
