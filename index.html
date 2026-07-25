@@ -2,528 +2,227 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Zoqira Trading Terminal</title>
-
-  <!-- TradingView Lightweight Charts Official Library -->
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pro Trading Terminal | XAUUSD & BTCUSDT</title>
   <style>
     :root {
-      --bg-dark: #0a0d12;
-      --bg-card: rgba(18, 22, 31, 0.85);
-      --bg-card-hover: rgba(28, 34, 48, 0.9);
-      --border-color: rgba(255, 255, 255, 0.08);
-      --text-main: #f0f3f8;
-      --text-muted: #788294;
-      --green-accent: #00f076;
-      --green-glow: rgba(0, 240, 118, 0.35);
-      --red-accent: #ff2a55;
-      --red-glow: rgba(255, 42, 85, 0.35);
-      --brand-gradient: linear-gradient(135deg, #f0b90b 0%, #ff8c00 100%);
-      --accent-blue: #0088ff;
+      --bg-color: #0b0e14;
+      --panel-bg: #151924;
+      --border-color: #2a2e3d;
+      --text-main: #d1d4dc;
+      --text-muted: #787b86;
+      --accent-green: #089981;
+      --accent-red: #f23645;
+      --accent-blue: #2962ff;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
-      background: radial-gradient(circle at 50% 0%, #151a26 0%, #0a0d12 70%);
+      background-color: var(--bg-color);
       color: var(--text-main);
-      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       height: 100vh;
-    }
-
-    .app-container {
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      overflow: hidden;
     }
 
-    /* Top Bar Header */
-    .top-bar {
+    /* Top Navigation Header */
+    header {
+      background-color: var(--panel-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 20px;
-      background: linear-gradient(180deg, rgba(20, 25, 36, 0.9) 0%, rgba(12, 15, 22, 0.9) 100%);
-      border-bottom: 1px solid var(--border-color);
-      height: 54px;
+      height: 56px;
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
     }
 
-    .logo {
-      background: var(--brand-gradient);
-      color: #000;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 6px;
-      box-shadow: 0 0 12px rgba(240, 185, 11, 0.4);
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-green);
     }
 
-    .brand-name {
-      font-weight: 800;
-      letter-spacing: 1px;
-      font-size: 16px;
-      background: linear-gradient(90deg, #fff, #8a99ad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .asset-info {
+    .asset-selector {
       display: flex;
-      align-items: center;
-      gap: 14px;
-      font-size: 14px;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 6px 16px;
-      border-radius: 20px;
+      gap: 8px;
+      background: var(--bg-color);
+      padding: 4px;
+      border-radius: 6px;
       border: 1px solid var(--border-color);
     }
 
-    .symbol { font-weight: 700; }
-    .price { font-weight: 700; color: #fff; }
-
-    .top-actions { display: flex; gap: 10px; }
-
-    /* Workspace Layout */
-    .workspace {
-      display: grid;
-      grid-template-columns: 240px 1fr 300px;
-      height: calc(100vh - 54px);
-    }
-
-    .sidebar-left, .sidebar-right {
-      background: var(--bg-card);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar-right {
-      border-right: none;
-      border-left: 1px solid var(--border-color);
-    }
-
-    .sidebar-header {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+    .tab-btn {
+      background: transparent;
+      border: none;
       color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .watchlist { list-style: none; overflow-y: auto; }
-
-    .watchlist-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 14px 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .watchlist-item:hover, .watchlist-item.active {
-      background: var(--bg-card-hover);
-      border-left: 3px solid #f0b90b;
+    .tab-btn:hover {
+      color: var(--text-main);
     }
 
-    .pair-info { display: flex; flex-direction: column; }
-    .pair-name { font-weight: 700; font-size: 13px; }
-    .pair-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .tab-btn.active {
+      background-color: var(--accent-blue);
+      color: #fff;
+    }
 
-    /* Chart Container */
-    .chart-container {
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      height: 100%;
-      width: 100%;
-      background: #0a0d12;
+    /* Ticker Tape Bar */
+    .ticker-bar {
+      height: 46px;
+      background-color: var(--panel-bg);
+      border-bottom: 1px solid var(--border-color);
       overflow: hidden;
     }
 
-    .chart-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 18px;
-      border-bottom: 1px solid var(--border-color);
-      height: 46px;
-      background: rgba(12, 15, 22, 0.6);
-    }
-
-    .signal-status-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      transition: all 0.3s ease;
-    }
-
-    .signal-status-pill.sell {
-      background: rgba(255, 42, 85, 0.15);
-      border: 1px solid rgba(255, 42, 85, 0.4);
-      color: var(--red-accent);
-      box-shadow: 0 0 10px var(--red-glow);
-    }
-
-    .signal-status-pill.buy {
-      background: rgba(0, 240, 118, 0.15);
-      border: 1px solid rgba(0, 240, 118, 0.4);
-      color: var(--green-accent);
-      box-shadow: 0 0 10px var(--green-glow);
-    }
-
-    .status-indicator.live {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background-color: var(--green-accent);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--green-accent);
-    }
-
-    #chart {
+    /* Main Chart Area */
+    main {
       flex: 1;
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 102px);
+    }
+
+    .chart-container {
       width: 100%;
       height: 100%;
+      display: none;
     }
 
-    /* Bottom Dock */
-    .bottom-dock {
-      display: flex;
-      gap: 10px;
-      padding: 0 18px;
-      background: rgba(12, 15, 22, 0.85);
-      border-top: 1px solid var(--border-color);
-      height: 46px;
-      align-items: center;
-    }
-
-    .dock-tab {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .dock-tab.active, .dock-tab:hover {
-      background: var(--brand-gradient);
-      color: #000;
-      border-color: transparent;
-      font-weight: 700;
-      box-shadow: 0 0 10px rgba(240, 185, 11, 0.3);
-    }
-
-    /* Copilot Side Panel */
-    .ai-chat-body { flex: 1; padding: 18px; font-size: 13px; overflow-y: auto; }
-
-    .ai-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-      border: 1px solid var(--border-color);
-      padding: 14px;
-      border-radius: 12px;
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .ai-actions { display: flex; gap: 8px; padding: 10px 18px; flex-wrap: wrap; }
-
-    .chip {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .chip:hover {
-      border-color: var(--accent-blue);
-      color: var(--accent-blue);
-    }
-
-    .ai-input-container {
-      display: flex;
-      padding: 14px;
-      gap: 10px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .ai-input-container input {
-      flex: 1;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text-main);
-      outline: none;
-    }
-
-    .btn {
-      background: var(--brand-gradient);
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 700;
-      color: #000;
-      cursor: pointer;
-      box-shadow: 0 0 12px rgba(240, 185, 11, 0.25);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-      box-shadow: none;
+    .chart-container.active {
+      display: block;
     }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <header class="top-bar">
-      <div class="brand">
-        <span class="logo">Z</span>
-        <span class="brand-name">ZOQIRA TERMINAL</span>
-      </div>
-      <div class="asset-info">
-        <span class="symbol">BTC/USDT</span>
-        <span class="price" id="header-price">$64,020.00</span>
-      </div>
-      <div class="top-actions">
-        <button class="btn btn-secondary">Telegram Alerts</button>
-        <button class="btn">Upgrade Pro</button>
-      </div>
-    </header>
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="status-dot"></div>
+      <span>PRO TERMINAL</span>
+    </div>
 
-    <main class="workspace">
-      <!-- Left Sidebar -->
-      <aside class="sidebar-left">
-        <div class="sidebar-header">Watchlist</div>
-        <ul class="watchlist">
-          <li class="watchlist-item active">
-            <div class="pair-info">
-              <span class="pair-name">BTCUSDT</span>
-              <span class="pair-sub">Bitcoin / Tether</span>
-            </div>
-          </li>
-          <li class="watchlist-item">
-            <div class="pair-info">
-              <span class="pair-name">ETHUSDT</span>
-              <span class="pair-sub">Ethereum / Tether</span>
-            </div>
-          </li>
-          <li class="watchlist-item">
-            <div class="pair-info">
-              <span class="pair-name">SOLUSDT</span>
-              <span class="pair-sub">Solana / Tether</span>
-            </div>
-          </li>
-        </ul>
-      </aside>
+    <div class="asset-selector">
+      <button class="tab-btn active" onclick="switchAsset('XAUUSD')">XAU / USD</button>
+      <button class="tab-btn" onclick="switchAsset('BTCUSDT')">BTC / USDT</button>
+    </div>
+  </header>
 
-      <!-- Center Chart Area -->
-      <section class="chart-container">
-        <div class="chart-toolbar">
-          <div class="signal-status-pill sell" id="signal-pill">
-            <span id="signal-text">ZOQIRA DESK: SELL SIGNAL ACTIVE</span>
-          </div>
-          <div style="font-size:12px; color:var(--text-muted);">
-            <span class="status-indicator live"></span> Realtime Feed Active
-          </div>
-        </div>
-        
-        <div id="chart"></div>
-
-        <div class="bottom-dock">
-          <button class="dock-tab active">Analysis</button>
-          <button class="dock-tab">AI Bot</button>
-          <button class="dock-tab">Signal History</button>
-          <button class="dock-tab">News</button>
-        </div>
-      </section>
-
-      <!-- Right Sidebar -->
-      <aside class="sidebar-right">
-        <div class="sidebar-header">Zoqira AI Copilot</div>
-        <div class="ai-chat-body" id="ai-chat-body">
-          <div class="ai-card">
-            <p style="color:#f0b90b; font-weight:700; margin-bottom:6px;">Live Stream Connected</p>
-            <p>Chart loaded with active price action and dynamic buy/sell signal detection.</p>
-          </div>
-        </div>
-        <div class="ai-actions">
-          <button class="chip">Analyze Trend</button>
-          <button class="chip">Risk Check</button>
-          <button class="chip">Clear Log</button>
-        </div>
-        <div class="ai-input-container">
-          <input type="text" placeholder="Ask AI about current signal..." />
-          <button class="btn">Send</button>
-        </div>
-      </aside>
-    </main>
+  <!-- Live Ticker Bar -->
+  <div class="ticker-bar">
+    <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+      {
+        "symbols": [
+          { "proName": "OANDA:XAUUSD", "title": "Gold (XAU/USD)" },
+          { "proName": "BINANCE:BTCUSDT", "title": "Bitcoin (BTC/USDT)" },
+          { "proName": "FX_IDC:EURUSD", "title": "EUR/USD" },
+          { "proName": "INDEX:DXY", "title": "US Dollar Index" }
+        ],
+        "showSymbolLogo": true,
+        "colorTheme": "dark",
+        "isTransparent": true,
+        "displayMode": "adaptive",
+        "locale": "en"
+      }
+      </script>
+    </div>
   </div>
 
-  <script>
-    const container = document.getElementById('chart');
-    const pill = document.getElementById('signal-pill');
-    const pillText = document.getElementById('signal-text');
-    const chatBody = document.getElementById('ai-chat-body');
+  <!-- Chart Workspace -->
+  <main>
+    <!-- XAUUSD Container -->
+    <div id="chart-XAUUSD" class="chart-container active">
+      <div class="tradingview-widget-container" style="height:100%;width:100%;">
+        <div id="tradingview_xauusd" style="height:100%;width:100%;"></div>
+      </div>
+    </div>
 
-    let allMarkers = [];
-    let currentPrice = 64020.00;
+    <!-- BTCUSDT Container -->
+    <div id="chart-BTCUSDT" class="chart-container">
+      <div class="tradingview-widget-container" style="height:100%;width:100%;">
+        <div id="tradingview_btcusdt" style="height:100%;width:100%;"></div>
+      </div>
+    </div>
+  </main>
 
-    // Create TradingView Chart Engine
-    const chart = LightweightCharts.createChart(container, {
-      layout: {
-        background: { color: '#0a0d12' },
-        textColor: '#788294',
-      },
-      grid: {
-        vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
-        horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
-      },
-      crosshair: {
-        mode: LightweightCharts.CrosshairMode.Normal,
-      },
-      rightPriceScale: {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        visible: true,
-      },
-      timeScale: {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        timeVisible: true,
-        secondsVisible: false,
-      },
-    });
+  <!-- TradingView Library Load -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script type="text/javascript">
+    // Track initialized widgets
+    const widgets = {};
 
-    const candlestickSeries = chart.addCandlestickSeries({
-      upColor: '#00f076',
-      downColor: '#ff2a55',
-      borderVisible: false,
-      wickUpColor: '#00f076',
-      wickDownColor: '#ff2a55',
-    });
+    function initChart(symbol, containerId) {
+      if (widgets[containerId]) return;
 
-    // Generate Initial Chart Data
-    function generateInitialData() {
-      const data = [];
-      let now = Math.floor(Date.now() / 1000) - 3600 * 2;
-      let price = 64500;
-
-      for (let i = 0; i < 80; i++) {
-        let open = price;
-        let change = (Math.random() - 0.52) * 120;
-        let close = open + change;
-        let high = Math.max(open, close) + Math.random() * 40;
-        let low = Math.min(open, close) - Math.random() * 40;
-        
-        price = close;
-        data.push({ time: now + i * 60, open, high, low, close });
-      }
-      return data;
-    }
-
-    const initialData = generateInitialData();
-    candlestickSeries.setData(initialData);
-
-    // Initial Markers
-    allMarkers = [
-      {
-        time: initialData[initialData.length - 25].time,
-        position: 'belowBar',
-        color: '#00f076',
-        shape: 'arrowUp',
-        text: 'BUY',
-      },
-      {
-        time: initialData[initialData.length - 5].time,
-        position: 'aboveBar',
-        color: '#ff2a55',
-        shape: 'arrowDown',
-        text: 'SELL',
-      }
-    ];
-    candlestickSeries.setMarkers(allMarkers);
-
-    // Attempt Live Binance WebSocket connection with automatic fallback
-    function initWebSocket() {
-      try {
-        const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@kline_1m');
-        
-        ws.onmessage = (event) => {
-          const message = JSON.parse(event.data);
-          const k = message.k;
-          const liveCandle = {
-            time: Math.floor(k.t / 1000),
-            open: parseFloat(k.o),
-            high: parseFloat(k.h),
-            low: parseFloat(k.l),
-            close: parseFloat(k.c)
-          };
-          candlestickSeries.update(liveCandle);
-          document.getElementById('header-price').innerText = '$' + liveCandle.close.toFixed(2);
-        };
-
-        ws.onerror = () => startFallbackSim();
-      } catch (e) {
-        startFallbackSim();
-      }
-    }
-
-    // Fallback Simulation for smooth real-time ticks
-    function startFallbackSim() {
-      let lastCandle = initialData[initialData.length - 1];
-      let currentTime = lastCandle.time;
-
-      setInterval(() => {
-        let delta = (Math.random() - 0.49) * 15;
-        currentPrice += delta;
-
-        lastCandle.close = currentPrice;
-        lastCandle.high = Math.max(lastCandle.high, currentPrice);
-        lastCandle.low = Math.min(lastCandle.low, currentPrice);
-
-        candlestickSeries.update(lastCandle);
-        document.getElementById('header-price').innerText = '$' + currentPrice.toFixed(2);
-      }, 1000);
-    }
-
-    initWebSocket();
-
-    // Auto-Resize Canvas
-    window.addEventListener('resize', () => {
-      chart.applyOptions({
-        width: container.clientWidth,
-        height: container.clientHeight,
+      widgets[containerId] = new TradingView.widget({
+        "autosize": true,
+        "symbol": symbol,
+        "interval": "60",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "en",
+        "toolbar_bg": "#151924",
+        "enable_publishing": false,
+        "hide_side_toolbar": false,
+        "allow_symbol_change": true,
+        "container_id": containerId,
+        "studies": [
+          "STD;EMA",
+          "STD;RSI",
+          "STD;MACD"
+        ]
       });
+    }
+
+    // Initialize initial default chart (XAUUSD)
+    document.addEventListener("DOMContentLoaded", () => {
+      initChart("OANDA:XAUUSD", "tradingview_xauusd");
     });
+
+    // Switch Tab Logic
+    function switchAsset(asset) {
+      // Update Tab Styles
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update Active Chart
+      document.querySelectorAll('.chart-container').forEach(c => c.classList.remove('active'));
+
+      if (asset === 'XAUUSD') {
+        document.getElementById('chart-XAUUSD').classList.add('active');
+        initChart("OANDA:XAUUSD", "tradingview_xauusd");
+      } else if (asset === 'BTCUSDT') {
+        document.getElementById('chart-BTCUSDT').classList.add('active');
+        initChart("BINANCE:BTCUSDT", "tradingview_btcusdt");
+      }
+    }
   </script>
 </body>
 </html>
